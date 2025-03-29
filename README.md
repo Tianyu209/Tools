@@ -1,5 +1,3 @@
-# Tools
-
 Contains various tools for me to use. Below is a list of the available tools:
 
 ## Tools
