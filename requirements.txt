@@ -1,0 +1,4 @@
+pandas==2.2.3
+pdf2docx==0.5.8
+pywin32==307
+pywin32==305.1
