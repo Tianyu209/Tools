@@ -1,6 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
+echo Checking Python installation...
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Python is not installed. Installing Python...
@@ -18,21 +19,30 @@ if %errorlevel% neq 0 (
     echo Installing Python...
     python_installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
     del python_installer.exe
-    
-    :python_installed
-    for /f "delims=" %%i in ('where python') do set "PYTHON_PATH=%%~dpi"
-    set "PATH=%PYTHON_PATH%;%PYTHON_PATH%Scripts;%PATH%"
 )
 
+:python_installed
+echo Refreshing environment variables...
+for /f "delims=" %%i in ('where python') do set "PYTHON_PATH=%%~dpi"
+set "PATH=%PYTHON_PATH%;%PYTHON_PATH%Scripts;%PATH%"
+
+echo Checking pip installation...
 pip --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Pip is not working properly. Attempting to fix...
+    echo Pip is not working properly. Installing pip...
     python -m ensurepip --default-pip
     python -m pip install --upgrade pip
 )
 
 echo Installing project requirements...
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+if %errorlevel% neq 0 (
+    echo Error: Failed to install requirements. Please check your internet connection and try again.
+    pause
+    exit /b 1
+)
 
 echo Setup completed successfully!
 pause
