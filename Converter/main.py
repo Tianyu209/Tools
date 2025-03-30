@@ -5,11 +5,23 @@ import pandas as pd
 import webbrowser
 from threading import Timer
 import logging
-
+import threading
+import time
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 os.makedirs("uploads", exist_ok=True)
-
+def delayed_file_cleanup(file_path, delay=5):
+    """delete files after a delay"""
+    def delete_file():
+        time.sleep(delay)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                logger.info(f'Cleaned up file (delayed): {file_path}')
+        except Exception as e:
+            logger.error(f'Failed to clean up file (delayed): {e}')
+    
+    threading.Thread(target=delete_file).start()
 def open_browser():
     webbrowser.open('http://127.0.0.1:5000/')
 
@@ -49,6 +61,7 @@ def convert():
         
         input_path = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], safe_filename))
         logger.info(f'Saving file to: {input_path}')
+        print(input_path)
         file.save(input_path)
         
         if not os.path.exists(input_path):
@@ -93,17 +106,23 @@ def convert():
                     logger.error(f'Failed to clean up input file: {e}')
 
             if output_path and os.path.exists(output_path):
-                try:
-                    os.remove(output_path)
-                    logger.info(f'Cleaned up output file: {output_path}')
-                except Exception as e:
-                    logger.error(f'Failed to clean up output file: {e}')
+                delayed_file_cleanup(output_path)
+                logger.info(f'Scheduled delayed cleanup for output file: {output_path}')
 
             return return_value
 
         except Exception as e:
             logger.error(f'Conversion failed: {str(e)}')
-            return jsonify({'error': str(e)}), 500
+            if ext.lower() == '.pdf':
+                return jsonify({'error': f'PDF转Word失败: {str(e)}。请检查PDF文件是否有效且未损坏。'}), 500
+            elif ext.lower() == '.docx':
+                return jsonify({'error': f'Word转PDF失败: {str(e)}。请检查Word文件是否有效且未损坏。'}), 500
+            elif ext.lower() == '.csv':
+                return jsonify({'error': f'CSV转Parquet失败: {str(e)}。请检查CSV文件格式是否正确。'}), 500
+            elif ext.lower() == '.parquet':
+                return jsonify({'error': f'Parquet转CSV失败: {str(e)}。请检查Parquet文件是否有效。'}), 500
+            else:
+                return jsonify({'error': f'转换失败: {str(e)}'}), 500
     except Exception as e:
         logger.error(f'Conversion failed: {str(e)}')
         if input_path and os.path.exists(input_path):
