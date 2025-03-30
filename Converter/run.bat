@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 echo Starting Converter application...
 for /F "tokens=*" %%A in ('type .env ^| findstr /v "^#" ^| findstr /v "^$"') do (
     set %%A

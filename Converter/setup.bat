@@ -34,10 +34,15 @@ if %errorlevel% neq 0 (
     python -m pip install --upgrade pip
 )
 
+echo Creating necessary directories...
+mkdir uploads 2>nul
+mkdir pdf 2>nul
+mkdir word 2>nul
+
 echo Installing project requirements...
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
-
 echo Setup completed successfully!
+echo You can now run the application using run.bat
 pause
