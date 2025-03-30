@@ -1,20 +1,38 @@
-#!/bin/bash
+@echo off
+setlocal enabledelayedexpansion
 
-echo "Setting up the environment..."
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Python is not installed. Installing Python...
+    
+    winget --version >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo Installing Python using winget...
+        winget install Python.Python.3.12 -e --silent
+        goto :python_installed
+    )
+    
+    echo Downloading Python installer...
+    powershell -Command "(New-Object Net.WebClient).DownloadFile('https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe', 'python_installer.exe')"
+    
+    echo Installing Python...
+    python_installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
+    del python_installer.exe
+    
+    :python_installed
+    for /f "delims=" %%i in ('where python') do set "PYTHON_PATH=%%~dpi"
+    set "PATH=%PYTHON_PATH%;%PYTHON_PATH%Scripts;%PATH%"
+)
 
-if ! command -v python3 &>/dev/null; then
-    echo "Error: Python3 is not installed. Please install Python3 and try again."
-    exit 1
-fi
+pip --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Pip is not working properly. Attempting to fix...
+    python -m ensurepip --default-pip
+    python -m pip install --upgrade pip
+)
 
-if ! command -v pip &>/dev/null; then
-    echo "Error: pip is not installed. Please install pip and try again."
-    exit 1
-fi
-
-echo "Installing dependencies..."
+echo Installing project requirements...
 pip install -r requirements.txt
 
-echo "Setup complete! You can now use the tools."
-
-exit 0
+echo Setup completed successfully!
+pause
