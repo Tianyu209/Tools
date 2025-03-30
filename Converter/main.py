@@ -6,7 +6,6 @@ import webbrowser
 from threading import Timer
 import logging
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 os.makedirs("uploads", exist_ok=True)
@@ -40,17 +39,14 @@ def convert():
             logger.error('Empty filename')
             return jsonify({'error': 'No file selected'}), 400
 
-        # 确保上传文件夹存在
         if not os.path.exists(app.config['UPLOAD_FOLDER']):
             logger.info('Recreating upload folder')
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-        # 安全处理文件名
         import re
         safe_filename = re.sub(r'[^a-zA-Z0-9._-]', '_', file.filename)
         logger.info(f'Processing file: {safe_filename}')
         
-        # 使用绝对路径保存文件
         input_path = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], safe_filename))
         logger.info(f'Saving file to: {input_path}')
         file.save(input_path)
@@ -61,7 +57,6 @@ def convert():
 
         logger.info(f'File saved successfully: {input_path}')
         
-        # Determine conversion type and output path
         filename, ext = os.path.splitext(safe_filename)
         
         try:
@@ -90,7 +85,6 @@ def convert():
             logger.info('Sending converted file')
             return_value = send_file(output_path, as_attachment=True)
             
-            # 在发送文件后清理
             if input_path and os.path.exists(input_path):
                 try:
                     os.remove(input_path)
@@ -112,7 +106,6 @@ def convert():
             return jsonify({'error': str(e)}), 500
     except Exception as e:
         logger.error(f'Conversion failed: {str(e)}')
-        # 发生错误时清理文件
         if input_path and os.path.exists(input_path):
             try:
                 os.remove(input_path)
