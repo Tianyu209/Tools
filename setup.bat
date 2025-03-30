@@ -34,10 +34,29 @@ if %errorlevel% neq 0 (
     python -m pip install --upgrade pip
 )
 
+echo Creating virtual environment...
+python -m venv venv
+
+echo Activating virtual environment...
+call venv\Scripts\activate.bat
+
 echo Installing project requirements...
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
 
+echo Installing required packages...
+pip install Flask==3.1.0
+pip install pandas==2.2.3
+pip install pdf2docx==0.5.8
+pip install pywin32==307
+
+echo Verifying installations...
+python -c "import flask; import pandas; import pdf2docx; import win32com.client" >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Error: Some packages failed to install correctly.
+    echo Please check your internet connection and try again.
+    pause
+    exit /b 1
+)
 
 echo Setup completed successfully!
 pause
