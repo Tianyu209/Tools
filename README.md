@@ -13,8 +13,9 @@ Contains various tools for personal use. Below is a list of the available tools:
 ## Installation
 
 ### 1️. Clone the Repository
-    git clone https://github.com/yourusername/yourrepo.git
-    cd yourrepo
+
+    git clone https://github.com/Tianyu209/Tools.git
+    cd Tools
 
 ### 2. Install Dependencies
     pip install -r requirements.txt
